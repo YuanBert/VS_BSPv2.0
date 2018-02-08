@@ -1,0 +1,34 @@
+﻿  gpio.c
+  adc.c
+  dma.c
+  i2c.c
+  spi.c
+  tim.c
+  usart.c
+  stm32f1xx_it.c
+  stm32f1xx_hal_msp.c
+  main.c
+  system_stm32f1xx.c
+  stm32f1xx_hal.c
+  stm32f1xx_hal_adc.c
+  stm32f1xx_hal_adc_ex.c
+  stm32f1xx_hal_uart.c
+  stm32f1xx_hal_pwr.c
+  stm32f1xx_hal_spi.c
+  stm32f1xx_hal_spi_ex.c
+  stm32f1xx_hal_flash.c
+  stm32f1xx_hal_flash_ex.c
+  stm32f1xx_hal_gpio.c
+  stm32f1xx_hal_rcc.c
+  stm32f1xx_hal_rcc_ex.c
+  stm32f1xx_hal_cortex.c
+  stm32f1xx_hal_tim.c
+  stm32f1xx_hal_tim_ex.c
+  stm32f1xx_hal_dma.c
+  stm32f1xx_hal_i2c.c
+  startup_stm32f103xe.c
+  stm32f1xx_hal_gpio_ex.c
+  Linking ../VisualGDB/Release/VS_BSPv2.0...
+  ------------------- Memory utilization report -------------------
+  Used FLASH: 26KB out of 256KB (10%)
+  Used RAM: 1196 bytes out of 48KB (2%)

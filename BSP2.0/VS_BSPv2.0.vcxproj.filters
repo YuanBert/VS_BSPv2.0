@@ -315,5 +315,17 @@
     <ClCompile Include="Src\bsp_led.c">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\bsp_gentlesensor.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\bsp_motor.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\bsp_DataTransmissionLayer.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\bsp_ProtocolLayer.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

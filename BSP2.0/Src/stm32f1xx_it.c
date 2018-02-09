@@ -34,9 +34,13 @@
 #include "stm32f1xx_hal.h"
 #include "stm32f1xx.h"
 #include "stm32f1xx_it.h"
+#include "bsp_DataTransmissionLayer.h"
 
 /* USER CODE BEGIN 0 */
-
+extern USARTRECIVETYPE     DriverBoardUsartType;
+extern USARTRECIVETYPE     LeftDoorBoardUsartType;
+void BSP_DriverBoardUsartReceive_IDLE(UART_HandleTypeDef *huart);
+void BSP_LeftDoorBoardUsartReceive_IDLE(UART_HandleTypeDef *huart);
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -320,6 +324,7 @@ void SPI1_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
+  BSP_DriverBoardUsartReceive_IDLE(&huart1);
 
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
@@ -334,6 +339,7 @@ void USART1_IRQHandler(void)
 void USART2_IRQHandler(void)
 {
   /* USER CODE BEGIN USART2_IRQn 0 */
+	BSP_DriverBoardUsartReceive_IDLE(&huart2);
 
   /* USER CODE END USART2_IRQn 0 */
   HAL_UART_IRQHandler(&huart2);

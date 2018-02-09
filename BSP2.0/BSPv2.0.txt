@@ -1,6 +1,6 @@
 Configuration	BSPv2.0
 STM32CubeMX 	4.24.0
-Date	02/08/2018
+Date	02/09/2018
 MCU	STM32F103RCTx
 
 

@@ -47,14 +47,30 @@
 #include "gpio.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "bsp_gentlesensor.h"
+#include "bsp_common.h"
+#include "bsp_motor.h"
+#include "bsp_led.h"
+#include "BSP_DAC5571.h"
+#include "bsp_DataTransmissionLayer.h"
+#include "bsp_ProtocolLayer.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+MOTORMACHINE gMotorMachine;
+GPIOSTATUSDETECTION gGentleSensorStatusDetection;
+uint8_t         gComingCarFlag;
 
+uint8_t gHorCurrrentRedVal;
+uint8_t gHorLastCurrentRedVal;
+uint8_t gStepCnterCurrentRedVal;
+uint8_t gStepCnterLastRedVal;
+
+uint8_t gLastStepValue;
+uint8_t gCurrentStepValue;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -103,16 +119,23 @@ int main(void)
   MX_ADC1_Init();
   MX_I2C2_Init();
   MX_SPI1_Init();
-  MX_TIM4_Init();//0.1ms
-  MX_TIM5_Init();//1ms
+  MX_TIM4_Init();
+  MX_TIM5_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
-  MX_TIM6_Init();//10us
+  MX_TIM6_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
-
+	HAL_TIM_Base_Start_IT(&htim4);//50us
+	HAL_TIM_Base_Start_IT(&htim5);//1ms
+	HAL_TIM_Base_Start_IT(&htim6);//200us
+	
+	BSP_MotorInit();
+	BSP_RUNNINGLED_ON();
+	BSP_DriverBoardProtocolInit();
+	BSP_LeftDoorBoardProtocolInit();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -123,6 +146,15 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
+	  BSP_HandingUartDataFromDriverBoard();
+	  BSP_HandingDriverBoardRequest();
+	  BSP_SendAckData();
+	  
+	  BSP_MotorCheck();
+	  BSP_MotorAction();	  
+	  
+	  //BSP_SendDataToDriverBoard((uint8_t*)" \r\n welcome \r\n",20,0xFFFF);
+	  //HAL_Delay(50);
 
   }
   /* USER CODE END 3 */
@@ -226,7 +258,106 @@ static void MX_NVIC_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	/* Prevent unused argument(s) compilation warning */
+	UNUSED(htim);
+	/* NOTE : This function Should not be modified, when the callback is needed,
+	          the __HAL_TIM_PeriodElapsedCallback could be implemented in the user file
+	*/
+	/* 50us */
+	if (htim4.Instance == htim->Instance)
+	{
+		gHorCurrrentRedVal = HAL_GPIO_ReadPin(HorRasterInput_GPIO_Port, HorRasterInput_Pin);
+		if (0 == gHorCurrrentRedVal && 0 == gHorLastCurrentRedVal)
+		{
+			gMotorMachine.HorFilterCnt++;
+			if (gMotorMachine.HorFilterCnt > 10)
+			{
+				gMotorMachine.HorizontalRasterState = 1;
+				gMotorMachine.HorFilterCnt = 0;
+				if (DOWNDIR == gMotorMachine.RunDir)
+				{
+					gMotorMachine.RunDir = UPDIR;
+					gMotorMachine.RunningState = 0;
+					gMotorMachine.StepCnt = 0;
+					BSP_MotorStop();
+				}
+			}
+		}
+		else
+		{
+			gMotorMachine.HorizontalRasterState = 0;
+			gMotorMachine.HorFilterCnt = 0;
+		}
+		gHorLastCurrentRedVal = gHorCurrrentRedVal;
+	}
+	
+	/* 1ms */
+	if (htim5.Instance == htim->Instance)
+	{
+		/*地感检测*/
+		gGentleSensorStatusDetection.GpioCurrentReadVal = HAL_GPIO_ReadPin(GentleSensor_GPIO_Port, GentleSensor_Pin);
+		if (0 == gGentleSensorStatusDetection.GpioCurrentReadVal && 0 == gGentleSensorStatusDetection.GpioLastReadVal)
+		{
+			
+		}
+		else
+		{
+			
+		}
+		
+		/* 雷达侦测 */
+		
+		/* 压力波探测 */
+		
+		/* 数字防砸 */
+		
+	}
+	/* 200us 1KHz 采样频率 */
+	if (htim6.Instance == htim->Instance)
+	{
+		if (1 == gMotorMachine.RunningState)
+		{
+			gStepCnterCurrentRedVal = HAL_GPIO_ReadPin(VerRasterInput_GPIO_Port, VerRasterInput_Pin);
+			if (0 == gStepCnterCurrentRedVal && 0 == gStepCnterLastRedVal)
+			{
+				gMotorMachine.VerFilterCnt++;
+				if (gMotorMachine.VerFilterCnt > 5)
+				{
+				
+					if (0 == gLastStepValue)
+					{
+						gMotorMachine.StepCnt++;
+					}
+					gLastStepValue = 1;
+					gMotorMachine.VerFilterCnt = 0;
+				}
+			}
+			else
+			{
+				gLastStepValue = 0;
+				gMotorMachine.VerFilterCnt = 0;
+			}
+			gStepCnterLastRedVal = gStepCnterCurrentRedVal;
 
+			if (gMotorMachine.StepCnt > 300 && UPDIR == gMotorMachine.RunDir)
+			{
+				gMotorMachine.VerticalRasterState = 1;
+				gMotorMachine.StepCnt = 0;
+				/* 此处可以添加对计数的日志信息的处理，此处写标记位 */
+				gMotorMachine.RunDir = DOWNDIR;
+				gMotorMachine.RunningState = 0;
+				BSP_MotorStop();
+			}
+		
+			if (gMotorMachine.StepCnt > 10 && DOWNDIR == gMotorMachine.RunDir)
+			{
+				gMotorMachine.VerticalRasterState = 0;
+			}
+		}	
+	}
+}
 /* USER CODE END 4 */
 
 /**

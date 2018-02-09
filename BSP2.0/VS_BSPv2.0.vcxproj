@@ -82,7 +82,11 @@
   </ImportGroup>
   <ItemGroup>
     <ClCompile Include="Src\BSP_DAC5571.c" />
+    <ClCompile Include="Src\bsp_DataTransmissionLayer.c" />
+    <ClCompile Include="Src\bsp_gentlesensor.c" />
     <ClCompile Include="Src\bsp_led.c" />
+    <ClCompile Include="Src\bsp_motor.c" />
+    <ClCompile Include="Src\bsp_ProtocolLayer.c" />
     <ClCompile Include="Src\gpio.c" />
     <ClCompile Include="Src\adc.c" />
     <ClCompile Include="Src\dma.c" />

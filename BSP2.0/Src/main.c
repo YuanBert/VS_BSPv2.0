@@ -1,3 +1,4 @@
+
 /**
   ******************************************************************************
   * @file           : main.c
@@ -276,7 +277,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			{
 				gMotorMachine.HorizontalRasterState = 1;
 				gMotorMachine.HorFilterCnt = 0;
-				if (DOWNDIR == gMotorMachine.RunDir)
+				if (DOWNDIR == gMotorMachine.RunDir)	//检测到杆在水平位置时值运动
 				{
 					gMotorMachine.RunDir = UPDIR;
 					gMotorMachine.RunningState = 0;
@@ -350,7 +351,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				gMotorMachine.RunningState = 0;
 				BSP_MotorStop();
 			}
+			
+			if (gMotorMachine.StepCnt < 290 && UPDIR == gMotorMachine.RunDir)
+			{
+				gMotorMachine.VerticalRasterState = 0;
+			}
 		
+			//判断是否离开了垂直位置，如果方向是关闸方向，且超过10步则认为是离开了设计的垂直位置
 			if (gMotorMachine.StepCnt > 10 && DOWNDIR == gMotorMachine.RunDir)
 			{
 				gMotorMachine.VerticalRasterState = 0;

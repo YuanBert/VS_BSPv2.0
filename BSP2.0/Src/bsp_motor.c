@@ -269,7 +269,39 @@ BSP_StatusTypeDef BSP_MotorCheck(void)
   /* 运行位置 */
   if(0 == gMotorMachine.VerticalRasterState && 0 == gMotorMachine.HorizontalRasterState)
   {
-    if(gMotorMachine.OpenFlag)
+    
+	  //向关闸方向运行
+	  if (gMotorMachine.RunningState && DOWNDIR == gMotorMachine.RunDir)
+	  {
+		  if (gMotorMachine.GentleSensorFlag || gMotorMachine.RadarSensorFlag || gMotorMachine.AirSensorFlag) //检测到地感和雷达后不关闸机
+			  {
+				  BSP_MotorStop();
+				  gMotorMachine.RunningState = 0;
+				  gMotorMachine.OpenFlag = 1;
+				  gGentleSensorStatusDetection.GpioCheckedFlag = 0;
+				  return state;
+			  }
+		  return state;
+	  }
+	  //向开闸的方向运行
+	  if(gMotorMachine.RunningState && UPDIR == gMotorMachine.RunDir)
+	  {
+		  //不作处理
+		  return state;
+	  }
+	  
+	  //如果处在非运行状态，且处于需要开启状态
+	  if(0 == gMotorMachine.RunningState && gMotorMachine.OpenFlag)
+	  {
+		  gMotorMachine.RunDir = UPDIR;
+		  gMotorMachine.OpenFlag = 0;
+		  gMotorMachine.CloseFlag = 1;
+		  gMotorMachine.StartFlag = 1; 
+		  
+	  }
+	  
+	//////////////////////////////////////////////////////////////////////////////  
+	  if(gMotorMachine.OpenFlag)
     {
       if(gMotorMachine.RunningState)
       {
@@ -309,7 +341,7 @@ BSP_StatusTypeDef BSP_MotorCheck(void)
     if(0 == gMotorMachine.RunningState)
     {
       gMotorMachine.RunDir = DOWNDIR;
-      gMotorMachine.OpenFlag = 1;
+      //gMotorMachine.OpenFlag = 1;
       gMotorMachine.CloseFlag = 0;
       gMotorMachine.StartFlag = 1;    
       return state;

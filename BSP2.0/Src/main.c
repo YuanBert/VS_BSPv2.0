@@ -65,8 +65,12 @@ MOTORMACHINE gMotorMachine;
 GPIOSTATUSDETECTION gGentleSensorStatusDetection;
 uint8_t         gComingCarFlag;
 
-uint8_t gHorCurrrentRedVal;
+uint8_t gHorCurrentRedVal;
 uint8_t gHorLastCurrentRedVal;
+
+uint8_t gVerCurrentRedVal;
+uint8_t gVerLastRedVal;
+
 uint8_t gStepCnterCurrentRedVal;
 uint8_t gStepCnterLastRedVal;
 
@@ -131,7 +135,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	HAL_TIM_Base_Start_IT(&htim4);//50us
 	HAL_TIM_Base_Start_IT(&htim5);//1ms
-	HAL_TIM_Base_Start_IT(&htim6);//200us
+	//HAL_TIM_Base_Start_IT(&htim6);//20ms
 	
 	BSP_MotorInit();
 	BSP_RUNNINGLED_ON();
@@ -151,8 +155,8 @@ int main(void)
 	  BSP_HandingDriverBoardRequest();
 	  BSP_SendAckData();
 	  
-	  BSP_MotorCheck();
-	  BSP_MotorAction();	  
+	  BSP_MotorCheckA();
+	  BSP_MotorActionA();	  
 	  
 	  //BSP_SendDataToDriverBoard((uint8_t*)" \r\n welcome \r\n",20,0xFFFF);
 	  //HAL_Delay(50);
@@ -269,8 +273,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	/* 50us */
 	if (htim4.Instance == htim->Instance)
 	{
-		gHorCurrrentRedVal = HAL_GPIO_ReadPin(HorRasterInput_GPIO_Port, HorRasterInput_Pin);
-		if (0 == gHorCurrrentRedVal && 0 == gHorLastCurrentRedVal)
+		gHorCurrentRedVal = HAL_GPIO_ReadPin(HorRasterInput_GPIO_Port, HorRasterInput_Pin);
+		gVerCurrentRedVal = HAL_GPIO_ReadPin(VerRasterInput_GPIO_Port, VerRasterInput_Pin);
+		
+		if (0 == gHorCurrentRedVal && 0 == gHorLastCurrentRedVal)
 		{
 			gMotorMachine.HorFilterCnt++;
 			if (gMotorMachine.HorFilterCnt > 10)
@@ -291,7 +297,34 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			gMotorMachine.HorizontalRasterState = 0;
 			gMotorMachine.HorFilterCnt = 0;
 		}
-		gHorLastCurrentRedVal = gHorCurrrentRedVal;
+		gHorLastCurrentRedVal = gHorCurrentRedVal;
+		
+		//垂直位杆监测
+		if (0 == gVerCurrentRedVal && 0 == gVerLastRedVal)
+		{
+			gMotorMachine.VerFilterCnt++;
+			if (gMotorMachine.VerFilterCnt > 10)
+			{
+				gMotorMachine.VerticalRasterState = 1;
+				gMotorMachine.VerFilterCnt = 0;
+				if (UPDIR == gMotorMachine.RunDir)
+				{
+					gMotorMachine.RunDir = DOWNDIR;
+					gMotorMachine.RunningState = 0;
+					gMotorMachine.StepCnt = 0;
+					BSP_MotorStop();
+					HAL_TIM_Base_Stop_IT(&htim6); //垂直到位关闭定时器中断
+					gMotorMachine.EncounteredFlag = 0;
+				}
+			}
+		}
+		else
+		{
+			gMotorMachine.VerticalRasterState = 0;
+			gMotorMachine.VerFilterCnt = 0;
+		}
+		gVerLastRedVal = gVerCurrentRedVal;
+		
 	}
 	
 	/* 1ms */
@@ -301,12 +334,31 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		gGentleSensorStatusDetection.GpioCurrentReadVal = HAL_GPIO_ReadPin(GentleSensor_GPIO_Port, GentleSensor_Pin);
 		if (0 == gGentleSensorStatusDetection.GpioCurrentReadVal && 0 == gGentleSensorStatusDetection.GpioLastReadVal)
 		{
-			
+			gGentleSensorStatusDetection.GpioFilterCnt++;
+			if (gGentleSensorStatusDetection.GpioFilterCnt > gGentleSensorStatusDetection.GpioFilterCntSum)
+			{
+				gGentleSensorStatusDetection.GpioStatusVal = 1;
+				gGentleSensorStatusDetection.GpioFilterCnt = 0;
+				gGentleSensorStatusDetection.GpioCheckedFlag = 1;
+				gMotorMachine.GentleSensorFlag	 = 1;
+				if (0 == gGentleSensorStatusDetection.GpioSendDataFlag)
+				{
+					gGentleSensorStatusDetection.GpioSendDataFlag = 1;
+				}
+			}
 		}
 		else
 		{
-			
+			gMotorMachine.GentleSensorFlag = 0;
+			gGentleSensorStatusDetection.GpioCheckedFlag  = 0;
+			gGentleSensorStatusDetection.GpioStatusVal	  = 0;
+			gGentleSensorStatusDetection.GpioFilterCnt    = 0;
+			gGentleSensorStatusDetection.GpioSendDataFlag = 1;
 		}
+		gGentleSensorStatusDetection.GpioLastReadVal = gGentleSensorStatusDetection.GpioCurrentReadVal;
+		
+		
+		
 		
 		/* 雷达侦测 */
 		
@@ -315,54 +367,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		/* 数字防砸 */
 		
 	}
-	/* 200us 1KHz 采样频率 */
+	/* 20ms */
 	if (htim6.Instance == htim->Instance)
 	{
-		if (1 == gMotorMachine.RunningState)
-		{
-			gStepCnterCurrentRedVal = HAL_GPIO_ReadPin(VerRasterInput_GPIO_Port, VerRasterInput_Pin);
-			if (0 == gStepCnterCurrentRedVal && 0 == gStepCnterLastRedVal)
-			{
-				gMotorMachine.VerFilterCnt++;
-				if (gMotorMachine.VerFilterCnt > 5)
-				{
-				
-					if (0 == gLastStepValue)
-					{
-						gMotorMachine.StepCnt++;
-					}
-					gLastStepValue = 1;
-					gMotorMachine.VerFilterCnt = 0;
-				}
-			}
-			else
-			{
-				gLastStepValue = 0;
-				gMotorMachine.VerFilterCnt = 0;
-			}
-			gStepCnterLastRedVal = gStepCnterCurrentRedVal;
 
-			if (gMotorMachine.StepCnt > 300 && UPDIR == gMotorMachine.RunDir)
-			{
-				gMotorMachine.VerticalRasterState = 1;
-				gMotorMachine.StepCnt = 0;
-				/* 此处可以添加对计数的日志信息的处理，此处写标记位 */
-				gMotorMachine.RunDir = DOWNDIR;
-				gMotorMachine.RunningState = 0;
-				BSP_MotorStop();
-			}
-			
-			if (gMotorMachine.StepCnt < 290 && UPDIR == gMotorMachine.RunDir)
-			{
-				gMotorMachine.VerticalRasterState = 0;
-			}
-		
-			//判断是否离开了垂直位置，如果方向是关闸方向，且超过10步则认为是离开了设计的垂直位置
-			if (gMotorMachine.StepCnt > 10 && DOWNDIR == gMotorMachine.RunDir)
-			{
-				gMotorMachine.VerticalRasterState = 0;
-			}
-		}	
 	}
 }
 /* USER CODE END 4 */

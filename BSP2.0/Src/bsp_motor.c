@@ -47,6 +47,7 @@
   */
   /* Includes ------------------------------------------------------------------*/
 #include "bsp_motor.h"
+#include "tim.h"
 extern uint8_t      gComingCarFlag;
 extern MOTORMACHINE gMotorMachine;
 extern GPIOSTATUSDETECTION gGentleSensorStatusDetection;
@@ -188,6 +189,139 @@ BSP_StatusTypeDef BSP_MotorStop(void)
 
 /*******************************************************************************
 *
+*       Function        :BSP_MotorCheckA()
+*
+*       Input           :void
+*
+*       Return          :BSP_StatusTypeDef
+*
+*       Description     :--
+*
+*
+*       Data            :2018/02/28
+*       Author          :bertz
+*******************************************************************************/
+BSP_StatusTypeDef BSP_MotorCheckA(void)
+{
+	BSP_StatusTypeDef state  = BSP_OK;
+	
+	//位置错误
+	if (gMotorMachine.HorizontalRasterState && gMotorMachine.VerticalRasterState)
+	{
+		BSP_MotorStop();
+		state = BSP_ERROR;
+		return state;	
+	}
+	
+	//在垂直位置
+	if (0 == gMotorMachine.HorizontalRasterState && gMotorMachine.VerticalRasterState)
+	{
+		/* 如果地感或雷达探测到信号时，不关闸 */
+		
+		if (gMotorMachine.OpenFlag)
+		{
+			gMotorMachine.OpenFlag = 0;
+		}
+		
+		if (1 == gMotorMachine.CloseFlag && 0 == gMotorMachine.RunningState)
+		{
+			if (DOWNDIR == gMotorMachine.RunDir)
+			{
+				gMotorMachine.StartFlag = 1;
+				return state;
+			}
+			return state;
+		}
+		gMotorMachine.OpenFlag  = 0;
+		gMotorMachine.CloseFlag = 1;
+		return state;
+	}
+	
+	//在水平位置
+	if(gMotorMachine.HorizontalRasterState && 0 == gMotorMachine.VerticalRasterState)
+	{
+		if (gMotorMachine.OpenFlag)
+		{
+			if (UPDIR == gMotorMachine.RunDir)
+			{
+				gMotorMachine.StartFlag = 1;
+				gMotorMachine.CloseFlag = 0;
+				return state;
+			}
+		}
+		if (gMotorMachine.CloseFlag)
+		{
+			gMotorMachine.CloseFlag = 0;
+			gMotorMachine.OpenFlag	= 0;
+			return state;
+		}
+	}
+	
+	//在中间位置
+	if(0 == gMotorMachine.HorizontalRasterState && 0 == gMotorMachine.VerticalRasterState)
+	{
+		//关闸方向运行
+		if (gMotorMachine.RunningState && DOWNDIR == gMotorMachine.RunDir)
+		{
+			/* 遇到地感 雷达 压力波 信号时 停止转动 */
+			return state;
+		}
+		/* 遇阻反弹操作 */
+		if (0 == gMotorMachine.RunningState && gMotorMachine.OpenFlag)
+		{
+			gMotorMachine.RunDir = UPDIR;
+			gMotorMachine.EncounteredFlag = 1;
+			gMotorMachine.OpenFlag = 0;
+			gMotorMachine.CloseFlag = 1;
+			gMotorMachine.StartFlag = 1;
+		}
+		
+		/* 初始检测，如果其在中间位置，进行关闸操作 */
+		if (0 == gMotorMachine.RunningState && DOWNDIR == gMotorMachine.RunDir)
+		{
+			gMotorMachine.StartFlag = 1;
+		}
+		
+	}
+	return state;
+}
+/*******************************************************************************
+*
+*       Function        :BSP_MotorActionA()
+*
+*       Input           :void
+*
+*       Return          :BSP_StatusTypeDef
+*
+*       Description     :--
+*
+*
+*       Data            :2017/12/28
+*       Author          :bertz
+*******************************************************************************/
+BSP_StatusTypeDef BSP_MotorActionA(void)
+{
+	BSP_StatusTypeDef state = BSP_OK;
+	if (gMotorMachine.StartFlag)
+	{
+		if (gMotorMachine.RunningState)
+		{
+			gMotorMachine.StartFlag = 0;
+			return state;
+		}
+		gMotorMachine.RunningState = 1;
+		BSP_MotorRun(gMotorMachine.RunDir);
+		if (UPDIR == gMotorMachine.RunDir && 0 == gMotorMachine.EncounteredFlag)
+		{
+			HAL_TIM_Base_Start_IT(&htim6);
+		}
+		gMotorMachine.StartFlag = 0;
+	}
+	return state;
+}
+
+/*******************************************************************************
+*
 *       Function        :BSP_MotorCheck()
 *
 *       Input           :void
@@ -294,6 +428,7 @@ BSP_StatusTypeDef BSP_MotorCheck(void)
 	  if(0 == gMotorMachine.RunningState && gMotorMachine.OpenFlag)
 	  {
 		  gMotorMachine.RunDir = UPDIR;
+		  gMotorMachine.EncounteredFlag = 1;
 		  gMotorMachine.OpenFlag = 0;
 		  gMotorMachine.CloseFlag = 1;
 		  gMotorMachine.StartFlag = 1; 

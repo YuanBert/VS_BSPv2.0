@@ -61,9 +61,24 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+/*软件版本号*/
+#define  CODEVERSION		0x0201
+
 MOTORMACHINE gMotorMachine;
 GPIOSTATUSDETECTION gGentleSensorStatusDetection;
-uint8_t         gComingCarFlag;
+
+uint32_t gADCBuffer[10];
+uint32_t gICurrentValue;
+uint8_t	 gICurrentValueBuff[2];
+
+/*存放用于读取的电流数据*/
+uint16_t gXDataBuf[10];
+uint8_t  xCnt;
+uint8_t  xSensorCnt;
+uint16_t Xavg;
+uint16_t AboveXAvg;
+
+uint8_t  gComingCarFlag;
 
 uint8_t gHorCurrentRedVal;
 uint8_t gHorLastCurrentRedVal;
@@ -76,6 +91,8 @@ uint8_t gStepCnterLastRedVal;
 
 uint8_t gLastStepValue;
 uint8_t gCurrentStepValue;
+
+uint8_t gTIM6Flag;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -86,7 +103,7 @@ static void MX_NVIC_Init(void);
 /* Private function prototypes -----------------------------------------------*/
 
 /* USER CODE END PFP */
-
+void FilterADCSignals(uint16_t xData);
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -99,7 +116,7 @@ static void MX_NVIC_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	uint8_t i = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -135,10 +152,13 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	HAL_TIM_Base_Start_IT(&htim4);//50us
 	HAL_TIM_Base_Start_IT(&htim5);//1ms
-	//HAL_TIM_Base_Start_IT(&htim6);//20ms
+	HAL_TIM_Base_Start_IT(&htim6);//5ms
+	/*获取电流值和温度信息*/
+	HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&gADCBuffer,10);
 	
 	BSP_MotorInit();
 	BSP_RUNNINGLED_ON();
+	BSP_GentleSensorInit();
 	BSP_DriverBoardProtocolInit();
 	BSP_LeftDoorBoardProtocolInit();
   /* USER CODE END 2 */
@@ -158,9 +178,20 @@ int main(void)
 	  BSP_MotorCheckA();
 	  BSP_MotorActionA();	  
 	  
-	  //BSP_SendDataToDriverBoard((uint8_t*)" \r\n welcome \r\n",20,0xFFFF);
-	  //HAL_Delay(50);
-
+	  /*每五个毫秒获取一次电流值 */
+	  if (gTIM6Flag)
+	  {
+		  gTIM6Flag = 0;
+		  for (i = 0; i < 10;)
+		  {
+			  gICurrentValue += gADCBuffer[i++];
+			  i++;
+		  }
+		  gICurrentValue /= 5;
+		  gICurrentValueBuff[0] = (uint8_t)(gICurrentValue >> 8);
+		  gICurrentValueBuff[1] = (uint8_t)(gICurrentValue);
+		  BSP_SendDataToDriverBoard(gICurrentValueBuff, 2, 0xFFFF);
+	  }
   }
   /* USER CODE END 3 */
 
@@ -367,10 +398,54 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		/* 数字防砸 */
 		
 	}
-	/* 20ms */
+	/* 5ms */
 	if (htim6.Instance == htim->Instance)
 	{
+		gTIM6Flag = 1;
+	}
+}
 
+void FilterADCSignals(uint16_t xData)
+{
+	/*如果电机处在运行状态且向下运行，则进行下一步的处理*/
+	xCnt++;
+	if (1 == xCnt)
+	{
+		Xavg = xData;
+		return ;
+	}
+	
+	if (xData > Xavg)
+	{
+		if ((xData - Xavg) > AboveXAvg)
+		{
+			xSensorCnt++;
+			if (xSensorCnt > 10)
+			{
+				/* 遇到阻碍，遇阻写标记位 */
+				xSensorCnt = 0;
+			}
+		}
+		else
+		{
+			xSensorCnt = 0;
+		}
+	}
+	else
+	{
+		if ((Xavg - xData) > AboveXAvg)
+		{
+			xSensorCnt++;
+			if (xSensorCnt > 10)
+			{
+				/* 遇到阻碍，遇阻写标记位 */
+				xSensorCnt = 0;
+			}			
+		}
+		else
+		{
+			xSensorCnt = 0;
+		}
 	}
 }
 /* USER CODE END 4 */

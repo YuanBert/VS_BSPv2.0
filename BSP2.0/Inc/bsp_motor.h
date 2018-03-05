@@ -91,6 +91,7 @@ BSP_StatusTypeDef      BSP_MotorCheck(void);
 BSP_StatusTypeDef      BSP_MotorAction(void);
 BSP_StatusTypeDef	   BSP_MotorCheckA(void);
 BSP_StatusTypeDef	   BSP_MotorActionA(void);
+	 
 #ifdef __cplusplus
 }
 #endif

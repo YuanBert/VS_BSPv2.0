@@ -48,10 +48,16 @@
   /* Includes ------------------------------------------------------------------*/
 #include "bsp_motor.h"
 #include "tim.h"
+#include "bsp_AirSensor.h"
+
 extern uint8_t      gComingCarFlag;
+extern AirSensor    gAirSensor;
 extern MOTORMACHINE gMotorMachine;
 extern GPIOSTATUSDETECTION gGentleSensorStatusDetection;
 extern GPIOSTATUSDETECTION gMCUAIRInputStatusGpio;
+/*关闭道闸定时器标记*/
+extern uint8_t gCloseFlag;
+extern uint32_t gCloseTimCnt;
 /*******************************************************************************
 *
 *       Function        :BSP_MotorInit()
@@ -217,6 +223,10 @@ BSP_StatusTypeDef BSP_MotorCheckA(void)
 	if (0 == gMotorMachine.HorizontalRasterState && gMotorMachine.VerticalRasterState)
 	{
 		/* 如果地感或雷达探测到信号时，不关闸 */
+		if (gCloseFlag || gGentleSensorStatusDetection.GpioCheckedFlag)
+		{
+			return state;
+		}
 		
 		if (gMotorMachine.OpenFlag)
 		{
@@ -264,6 +274,14 @@ BSP_StatusTypeDef BSP_MotorCheckA(void)
 		if (gMotorMachine.RunningState && DOWNDIR == gMotorMachine.RunDir)
 		{
 			/* 遇到地感 雷达 压力波 信号时 停止转动 */
+			if (gAirSensor.CheckedFlag || gGentleSensorStatusDetection.GpioCheckedFlag)
+			{
+				BSP_MotorStop();
+				gMotorMachine.RunningState = 0;
+				gMotorMachine.OpenFlag = 1;
+				gMotorMachine.EncounteredFlag = 1;
+				
+			}
 			return state;
 		}
 		/* 遇阻反弹操作 */

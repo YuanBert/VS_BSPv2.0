@@ -60,7 +60,7 @@ VisualGDB/Release/main.o: Src/main.c Inc/main.h \
  Inc/bsp_gentlesensor.h Inc/bsp_common.h Inc/bsp_common.h Inc/bsp_motor.h \
  Inc/gpio.h Inc/usart.h Inc/bsp_led.h Inc/BSP_DAC5571.h Inc/bsp_Common.h \
  Inc/i2c.h Inc/bsp_DataTransmissionLayer.h Inc/bsp_ProtocolLayer.h \
- Inc/bsp_DataTransmissionLayer.h
+ Inc/bsp_DataTransmissionLayer.h Inc/bsp_AirSensor.h Inc/bsp_Log.h
 
 Inc/main.h:
 
@@ -221,3 +221,7 @@ Inc/bsp_DataTransmissionLayer.h:
 Inc/bsp_ProtocolLayer.h:
 
 Inc/bsp_DataTransmissionLayer.h:
+
+Inc/bsp_AirSensor.h:
+
+Inc/bsp_Log.h:

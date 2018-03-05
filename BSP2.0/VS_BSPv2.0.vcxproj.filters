@@ -327,5 +327,11 @@
     <ClCompile Include="Src\bsp_ProtocolLayer.c">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\bsp_AirSensor.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\bsp_Log.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

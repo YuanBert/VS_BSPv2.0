@@ -55,6 +55,9 @@
 #include "BSP_DAC5571.h"
 #include "bsp_DataTransmissionLayer.h"
 #include "bsp_ProtocolLayer.h"
+#include "bsp_AirSensor.h"
+#include "bsp_Log.h"
+
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -66,6 +69,7 @@
 
 MOTORMACHINE gMotorMachine;
 GPIOSTATUSDETECTION gGentleSensorStatusDetection;
+AirSensor gAirSensor;
 
 uint32_t gADCBuffer[10];
 uint32_t gICurrentValue;
@@ -93,6 +97,18 @@ uint8_t gLastStepValue;
 uint8_t gCurrentStepValue;
 
 uint8_t gTIM6Flag;
+
+/*氛围灯标记以及氛围灯控制计时*/
+uint8_t gAtmosphereTimFlag;
+uint16_t gAtmosphereTimCnt;
+
+/*关闭道闸定时器标记*/
+uint8_t gCloseFlag;
+uint32_t gCloseTimCnt;
+
+/*定时日志上报*/
+uint8_t  gReportLogFlag;
+uint32_t gReportLogTimCnt;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -152,15 +168,21 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	HAL_TIM_Base_Start_IT(&htim4);//50us
 	HAL_TIM_Base_Start_IT(&htim5);//1ms
-	HAL_TIM_Base_Start_IT(&htim6);//5ms
+	//HAL_TIM_Base_Start_IT(&htim6);//5ms
 	/*获取电流值和温度信息*/
 	HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&gADCBuffer,10);
 	
+	
 	BSP_MotorInit();
-	BSP_RUNNINGLED_ON();
+	BSP_RUNNINGLED_ON(); 
+	BSP_AirSensor_Init(5);
 	BSP_GentleSensorInit();
+	BSP_Log_Init(0x01020304);
 	BSP_DriverBoardProtocolInit();
 	BSP_LeftDoorBoardProtocolInit();
+	BSP_DAC5571_Init(NormalOperationMode);
+	
+	//BSP_DAC5571_WriteValue(NormalOperationMode, 230);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -176,9 +198,27 @@ int main(void)
 	  BSP_SendAckData();
 	  
 	  BSP_MotorCheckA();
-	  BSP_MotorActionA();	  
+	  BSP_MotorActionA();
 	  
-	  /*每五个毫秒获取一次电流值 */
+	  /*氛围灯控制*/
+	  if (gAtmosphereTimFlag)
+	  {
+		  BSP_LEDCheck(); 
+		  BSP_Log_UpAtmoshereStatus(gComingCarFlag);
+		  gAtmosphereTimFlag = 0;
+	  }
+	  
+	  /*定时上报日志*/
+	  if (gReportLogFlag)
+	  {
+		  BSP_Log_UpMotorStatus(gMotorMachine.RunningState);
+		  BSP_Log_UpGentleStatus(gGentleSensorStatusDetection.GpioCheckedFlag);
+		  BSP_Log_UpAirSensorStatus(gAirSensor.CheckedFlag);
+		  BSP_Log_CheckReportInfo();
+		  gReportLogFlag = 0;
+	  }
+	  
+	  /* 在开闸的过程中 每五个毫秒获取一次电流值 */
 	  if (gTIM6Flag)
 	  {
 		  gTIM6Flag = 0;
@@ -187,6 +227,7 @@ int main(void)
 			  gICurrentValue += gADCBuffer[i++];
 			  i++;
 		  }
+		  
 		  gICurrentValue /= 5;
 		  gICurrentValueBuff[0] = (uint8_t)(gICurrentValue >> 8);
 		  gICurrentValueBuff[1] = (uint8_t)(gICurrentValue);
@@ -345,7 +386,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					gMotorMachine.StepCnt = 0;
 					BSP_MotorStop();
 					HAL_TIM_Base_Stop_IT(&htim6); //垂直到位关闭定时器中断
-					gMotorMachine.EncounteredFlag = 0;
+					gMotorMachine.EncounteredFlag = 0;//将遇阻反弹标记位清零
+					gCloseFlag = 1;//垂直到位，打开定时器，进行延时，延时后进行关闸
 				}
 			}
 		}
@@ -365,18 +407,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		gGentleSensorStatusDetection.GpioCurrentReadVal = HAL_GPIO_ReadPin(GentleSensor_GPIO_Port, GentleSensor_Pin);
 		if (0 == gGentleSensorStatusDetection.GpioCurrentReadVal && 0 == gGentleSensorStatusDetection.GpioLastReadVal)
 		{
-			gGentleSensorStatusDetection.GpioFilterCnt++;
-			if (gGentleSensorStatusDetection.GpioFilterCnt > gGentleSensorStatusDetection.GpioFilterCntSum)
+			if (0 == gGentleSensorStatusDetection.GpioCheckedFlag)
 			{
-				gGentleSensorStatusDetection.GpioStatusVal = 1;
-				gGentleSensorStatusDetection.GpioFilterCnt = 0;
-				gGentleSensorStatusDetection.GpioCheckedFlag = 1;
-				gMotorMachine.GentleSensorFlag	 = 1;
-				if (0 == gGentleSensorStatusDetection.GpioSendDataFlag)
+				gGentleSensorStatusDetection.GpioFilterCnt++;
+				if (gGentleSensorStatusDetection.GpioFilterCnt > gGentleSensorStatusDetection.GpioFilterCntSum)
 				{
-					gGentleSensorStatusDetection.GpioSendDataFlag = 1;
+					gGentleSensorStatusDetection.GpioStatusVal = 1;
+					gGentleSensorStatusDetection.GpioFilterCnt = 0;
+					gGentleSensorStatusDetection.GpioCheckedFlag = 1;
+					gMotorMachine.GentleSensorFlag	 = 1;
+					gComingCarFlag = 1;
 				}
 			}
+
 		}
 		else
 		{
@@ -385,17 +428,64 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			gGentleSensorStatusDetection.GpioStatusVal	  = 0;
 			gGentleSensorStatusDetection.GpioFilterCnt    = 0;
 			gGentleSensorStatusDetection.GpioSendDataFlag = 1;
+			gComingCarFlag = 0;
 		}
 		gGentleSensorStatusDetection.GpioLastReadVal = gGentleSensorStatusDetection.GpioCurrentReadVal;
 		
-		
+		if (gCloseFlag)
+		{
+			gCloseTimCnt++;
+			if (gCloseTimCnt > 25000)
+			{
+				gCloseFlag = 0;
+				gCloseTimCnt = 0;
+			}
+		}
+		else
+		{
+			gCloseTimCnt = 0;
+		}
 		
 		
 		/* 雷达侦测 */
 		
 		/* 压力波探测 */
+		gAirSensor.CurrentReadValue = HAL_GPIO_ReadPin(MCU_AIR_GPIO_Port, MCU_AIR_Pin);
+		if (0 == gAirSensor.CurrentReadValue && 0 == gAirSensor.LastReadValue)
+		{
+			if (0 == gAirSensor.CheckedFlag)
+			{
+				gAirSensor.FilterCnt++;
+				if (gAirSensor.FilterCnt > gAirSensor.FilterCntSum)
+				{
+					gAirSensor.CheckedFlag = 1;
+					gAirSensor.FilterCnt = 0;
+				}
+			}
+		}
+		else
+		{
+			gAirSensor.CheckedFlag = 1;
+			gAirSensor.FilterCnt = 0;
+		}
+		gAirSensor.LastReadValue = gAirSensor.CurrentReadValue;
 		
 		/* 数字防砸 */
+		
+		/* 日志计时定时器 */
+		gReportLogTimCnt++;
+		if (gReportLogTimCnt > 10000)
+		{
+			gReportLogFlag = 1;
+			gReportLogTimCnt = 0;
+		}
+		/* 氛围灯 */
+		gAtmosphereTimCnt++;
+		if (gAtmosphereTimCnt > 200)
+		{
+			gAtmosphereTimFlag = 1;
+			gAtmosphereTimCnt = 0;
+		}
 		
 	}
 	/* 5ms */

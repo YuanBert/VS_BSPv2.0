@@ -454,6 +454,8 @@ BSP_StatusTypeDef BSP_HandingDriverBoardRequest(void)
 		  
 		  Table.tab[SendOpenFlag.position] = 0x02;
 	  }
+	  
+	  
   
 	  DriverBoardRevDataStruct.NumberOfBytesReceived = 0;  
 	  DriverBoardRevDataStruct.DataLength  = 0;

@@ -49,6 +49,7 @@
 #include "bsp_led.h"
 #include "bsp_motor.h"
 extern MOTORMACHINE gMotorMachine;
+extern uint8_t gComingCarFlag;
  /*******************************************************************************
     *
     *       Function        :BSP_RUNNINGLED_ON()
@@ -278,7 +279,7 @@ extern MOTORMACHINE gMotorMachine;
     
     void BSP_LEDCheck(void)
     {
-      if(gMotorMachine.GentleSensorFlag)
+	    if (gComingCarFlag)
       {
         BSP_ATMOSPHERELEDG_TOGGLE();
         BSP_ATMOSPHERELEDR_TOGGLE();

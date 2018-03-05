@@ -7,7 +7,7 @@
     <Revision>2</Revision>
   </ToolchainVersion>
   <BspID>com.sysprogs.arm.stm32</BspID>
-  <BspVersion>4.5R3</BspVersion>
+  <BspVersion>4.6R2</BspVersion>
   <McuID>STM32F103RCTx</McuID>
   <MCUDefinitionFile>STM32F1xxxx/DeviceDefinitions/stm32f103xe.xml</MCUDefinitionFile>
   <MCUProperties>

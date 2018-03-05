@@ -1,11 +1,11 @@
-﻿生成启动时间为 2018/3/2 14:08:44。
+﻿生成启动时间为 2018/3/5 19:28:34。
      1>项目“E:\Users\Bert\Documents\GitHub\VS_BSPv2.0\BSP2.0\VS_BSPv2.0.vcxproj”在节点 2 上(Build 个目标)。
      1>OutputMemoryUtilization:
          ------------------- Memory utilization report -------------------
-         Used FLASH: 31KB out of 256KB (12%)
-         Used RAM: 3136 bytes out of 48KB (6%)
+         Used FLASH: 33KB out of 256KB (12%)
+         Used RAM: 3220 bytes out of 48KB (6%)
      1>已完成生成项目“E:\Users\Bert\Documents\GitHub\VS_BSPv2.0\BSP2.0\VS_BSPv2.0.vcxproj”(Build 个目标)的操作。
 
 生成成功。
 
-已用时间 00:00:01.72
+已用时间 00:00:00.20

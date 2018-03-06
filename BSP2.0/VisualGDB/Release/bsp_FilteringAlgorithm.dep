@@ -1,0 +1,6 @@
+VisualGDB/Release/bsp_FilteringAlgorithm.o: Src/bsp_FilteringAlgorithm.c \
+ Inc/bsp_FilteringAlgorithm.h Inc/main.h
+
+Inc/bsp_FilteringAlgorithm.h:
+
+Inc/main.h:

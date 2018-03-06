@@ -71,8 +71,10 @@ MOTORMACHINE gMotorMachine;
 GPIOSTATUSDETECTION gGentleSensorStatusDetection;
 AirSensor gAirSensor;
 
+uint32_t gXDataBuffer[10];
 uint32_t gADCBuffer[10];
 uint32_t gICurrentValue;
+uint16_t gICurrent;
 uint8_t	 gICurrentValueBuff[2];
 
 /*存放用于读取的电流数据*/
@@ -80,7 +82,7 @@ uint16_t gXDataBuf[10];
 uint8_t  xCnt;
 uint8_t  xSensorCnt;
 uint16_t Xavg;
-uint16_t AboveXAvg;
+uint16_t AboveXAvg = 0x02FF;
 
 uint8_t  gComingCarFlag;
 
@@ -120,6 +122,7 @@ static void MX_NVIC_Init(void);
 
 /* USER CODE END PFP */
 void FilterADCSignals(uint16_t xData);
+//void SampleCtrl();
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -168,7 +171,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	HAL_TIM_Base_Start_IT(&htim4);//50us
 	HAL_TIM_Base_Start_IT(&htim5);//1ms
-	//HAL_TIM_Base_Start_IT(&htim6);//5ms
+	HAL_TIM_Base_Start_IT(&htim6);//5ms
 	/*获取电流值和温度信息*/
 	HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&gADCBuffer,10);
 	
@@ -231,7 +234,21 @@ int main(void)
 		  gICurrentValue /= 5;
 		  gICurrentValueBuff[0] = (uint8_t)(gICurrentValue >> 8);
 		  gICurrentValueBuff[1] = (uint8_t)(gICurrentValue);
-		  BSP_SendDataToDriverBoard(gICurrentValueBuff, 2, 0xFFFF);
+		  if(DOWNDIR == gMotorMachine.RunDir && gMotorMachine.RunningState)
+		  {
+			  FilterADCSignals(gICurrentValue);
+		  }
+		  
+		  if (UPDIR == gMotorMachine.RunDir && gMotorMachine.RunningState)
+		  {
+			  if (gICurrentValue > gICurrent)
+			  {
+				  gICurrent = gICurrentValue;
+				  BSP_Log_UpICurrentValue(gICurrent);
+			  }
+		  }
+		  
+		  
 	  }
   }
   /* USER CODE END 3 */
@@ -361,6 +378,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					gMotorMachine.RunningState = 0;
 					gMotorMachine.StepCnt = 0;
 					BSP_MotorStop();
+					gICurrent = 0;
 				}
 			}
 		}
@@ -385,8 +403,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					gMotorMachine.RunningState = 0;
 					gMotorMachine.StepCnt = 0;
 					BSP_MotorStop();
-					HAL_TIM_Base_Stop_IT(&htim6); //垂直到位关闭定时器中断
+					gICurrent = 0;
+					//HAL_TIM_Base_Stop_IT(&htim6); //垂直到位关闭定时器中断
 					gMotorMachine.EncounteredFlag = 0;//将遇阻反弹标记位清零
+					gMotorMachine.DigitalAntiSmashingFlag = 0;//数字防砸标记位清空
 					gCloseFlag = 1;//垂直到位，打开定时器，进行延时，延时后进行关闸
 				}
 			}
@@ -498,44 +518,38 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 void FilterADCSignals(uint16_t xData)
 {
 	/*如果电机处在运行状态且向下运行，则进行下一步的处理*/
-	xCnt++;
-	if (1 == xCnt)
+	uint8_t  i;
+	uint32_t temple;
+	if (0 == xCnt)
 	{
 		Xavg = xData;
 		return ;
 	}
 	
-	if (xData > Xavg)
+	if ((xData - Xavg) > AboveXAvg || (Xavg - xData) > AboveXAvg)
 	{
-		if ((xData - Xavg) > AboveXAvg)
+		xSensorCnt++;
+		if (xSensorCnt > 100)
 		{
-			xSensorCnt++;
-			if (xSensorCnt > 10)
-			{
-				/* 遇到阻碍，遇阻写标记位 */
-				xSensorCnt = 0;
-			}
-		}
-		else
-		{
+			/* 遇到阻碍，遇阻写标记位 */
 			xSensorCnt = 0;
+			gMotorMachine.DigitalAntiSmashingFlag = 1;
 		}
 	}
 	else
 	{
-		if ((Xavg - xData) > AboveXAvg)
+		xCnt++;
+		gXDataBuffer[xCnt] = xData;
+		if (xCnt > 10)
 		{
-			xSensorCnt++;
-			if (xSensorCnt > 10)
+			for (i = 0; i < 10; i++)
 			{
-				/* 遇到阻碍，遇阻写标记位 */
-				xSensorCnt = 0;
-			}			
+				temple += gXDataBuffer[i];
+			}
+			temple /= 10;
+			Xavg = temple;
 		}
-		else
-		{
-			xSensorCnt = 0;
-		}
+		xCnt = 0;
 	}
 }
 /* USER CODE END 4 */

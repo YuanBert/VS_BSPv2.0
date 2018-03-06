@@ -274,7 +274,7 @@ BSP_StatusTypeDef BSP_MotorCheckA(void)
 		if (gMotorMachine.RunningState && DOWNDIR == gMotorMachine.RunDir)
 		{
 			/* 遇到地感 雷达 压力波 信号时 停止转动 */
-			if (gAirSensor.CheckedFlag || gGentleSensorStatusDetection.GpioCheckedFlag)
+			if (gGentleSensorStatusDetection.GpioCheckedFlag)
 			{
 				BSP_MotorStop();
 				gMotorMachine.RunningState = 0;
@@ -329,10 +329,10 @@ BSP_StatusTypeDef BSP_MotorActionA(void)
 		}
 		gMotorMachine.RunningState = 1;
 		BSP_MotorRun(gMotorMachine.RunDir);
-		if (UPDIR == gMotorMachine.RunDir && 0 == gMotorMachine.EncounteredFlag)
-		{
-			HAL_TIM_Base_Start_IT(&htim6);
-		}
+//		if (UPDIR == gMotorMachine.RunDir && 0 == gMotorMachine.EncounteredFlag)
+//		{
+//			HAL_TIM_Base_Start_IT(&htim6);
+//		}
 		gMotorMachine.StartFlag = 0;
 	}
 	return state;

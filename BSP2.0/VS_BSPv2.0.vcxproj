@@ -84,6 +84,7 @@
     <ClCompile Include="Src\bsp_AirSensor.c" />
     <ClCompile Include="Src\BSP_DAC5571.c" />
     <ClCompile Include="Src\bsp_DataTransmissionLayer.c" />
+    <ClCompile Include="Src\bsp_FilteringAlgorithm.c" />
     <ClCompile Include="Src\bsp_gentlesensor.c" />
     <ClCompile Include="Src\bsp_led.c" />
     <ClCompile Include="Src\bsp_Log.c" />

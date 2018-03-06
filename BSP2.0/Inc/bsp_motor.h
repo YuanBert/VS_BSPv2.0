@@ -79,6 +79,7 @@
      uint8_t  OpenFlag;
      uint8_t  CloseFlag;
      uint8_t  EncounteredFlag;
+	 uint8_t  DigitalAntiSmashingFlag;
 	 uint16_t  StepCnt;
    }MOTORMACHINE,*pMOTORMACHINE;
    

@@ -185,7 +185,7 @@ int main(void)
 	BSP_LeftDoorBoardProtocolInit();
 	BSP_DAC5571_Init(NormalOperationMode);
 	
-	//BSP_DAC5571_WriteValue(NormalOperationMode, 230);
+	BSP_DAC5571_WriteValue(NormalOperationMode, 230);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -485,7 +485,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		}
 		else
 		{
-			gAirSensor.CheckedFlag = 1;
+			gAirSensor.CheckedFlag = 0;
 			gAirSensor.FilterCnt = 0;
 		}
 		gAirSensor.LastReadValue = gAirSensor.CurrentReadValue;

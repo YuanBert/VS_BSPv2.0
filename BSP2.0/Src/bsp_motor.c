@@ -49,6 +49,7 @@
 #include "bsp_motor.h"
 #include "tim.h"
 #include "bsp_AirSensor.h"
+#include "BSP_DAC5571.h"
 
 extern uint8_t      gComingCarFlag;
 extern AirSensor    gAirSensor;
@@ -156,7 +157,8 @@ BSP_StatusTypeDef BSP_MotorRun(uint8_t nDir)
   BSP_StatusTypeDef state  = BSP_OK;
   if(UPDIR == nDir) //逆时针
   {
-    HAL_GPIO_WritePin(MotorBRKCtrl_GPIO_Port,MotorBRKCtrl_Pin,GPIO_PIN_RESET);
+	BSP_DAC5571_WriteValue(NormalOperationMode, 150);
+	HAL_GPIO_WritePin(MotorBRKCtrl_GPIO_Port,MotorBRKCtrl_Pin,GPIO_PIN_RESET);
     HAL_GPIO_WritePin(MotorFRCtrl_GPIO_Port,MotorFRCtrl_Pin, GPIO_PIN_RESET);
     HAL_GPIO_WritePin(MotorENCtrl_GPIO_Port,MotorENCtrl_Pin,GPIO_PIN_RESET);
   }
@@ -274,7 +276,7 @@ BSP_StatusTypeDef BSP_MotorCheckA(void)
 		if (gMotorMachine.RunningState && DOWNDIR == gMotorMachine.RunDir)
 		{
 			/* 遇到地感 雷达 压力波 信号时 停止转动 */
-			if (gGentleSensorStatusDetection.GpioCheckedFlag)
+			if (gGentleSensorStatusDetection.GpioCheckedFlag || gAirSensor.CheckedFlag)
 			{
 				BSP_MotorStop();
 				gMotorMachine.RunningState = 0;

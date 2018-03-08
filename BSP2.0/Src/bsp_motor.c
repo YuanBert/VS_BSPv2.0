@@ -57,6 +57,7 @@ extern MOTORMACHINE gMotorMachine;
 extern GPIOSTATUSDETECTION gGentleSensorStatusDetection;
 extern GPIOSTATUSDETECTION gMCUAIRInputStatusGpio;
 /*关闭道闸定时器标记*/
+extern uint8_t OpenSpeedFlag;
 extern uint8_t gCloseFlag;
 extern uint32_t gCloseTimCnt;
 /*******************************************************************************
@@ -331,10 +332,11 @@ BSP_StatusTypeDef BSP_MotorActionA(void)
 		}
 		gMotorMachine.RunningState = 1;
 		BSP_MotorRun(gMotorMachine.RunDir);
-//		if (UPDIR == gMotorMachine.RunDir && 0 == gMotorMachine.EncounteredFlag)
-//		{
-//			HAL_TIM_Base_Start_IT(&htim6);
-//		}
+		
+		if (UPDIR == gMotorMachine.RunDir && 0 == gMotorMachine.EncounteredFlag)
+		{
+			OpenSpeedFlag = 1;
+		}
 		gMotorMachine.StartFlag = 0;
 	}
 	return state;

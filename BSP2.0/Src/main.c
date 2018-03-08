@@ -71,6 +71,9 @@ MOTORMACHINE gMotorMachine;
 GPIOSTATUSDETECTION gGentleSensorStatusDetection;
 AirSensor gAirSensor;
 
+uint16_t  OpenSpeedCnt;
+uint8_t   OpenSpeedFlag;
+
 uint32_t gXDataBuffer[10];
 uint32_t gADCBuffer[10];
 uint32_t gICurrentValue;
@@ -443,6 +446,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		}
 		else
 		{
+			if (gGentleSensorStatusDetection.GpioCheckedFlag)
+			{
+				gCloseFlag = 0; //车经过之后立即关闸
+			}
 			gMotorMachine.GentleSensorFlag = 0;
 			gGentleSensorStatusDetection.GpioCheckedFlag  = 0;
 			gGentleSensorStatusDetection.GpioStatusVal	  = 0;
@@ -455,7 +462,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if (gCloseFlag)
 		{
 			gCloseTimCnt++;
-			if (gCloseTimCnt > 25000)
+			if (gCloseTimCnt > 25000)//25s延时
 			{
 				gCloseFlag = 0;
 				gCloseTimCnt = 0;
@@ -512,6 +519,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if (htim6.Instance == htim->Instance)
 	{
 		gTIM6Flag = 1;
+		if (OpenSpeedFlag)
+		{
+			/*添加速度调制*/
+		}
+		
 	}
 }
 

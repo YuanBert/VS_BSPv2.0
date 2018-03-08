@@ -1,8 +1,6 @@
-﻿生成启动时间为 2018/3/7 11:31:03。
+﻿生成启动时间为 2018/3/8 15:39:28。
      1>项目“E:\Users\Bert\Documents\GitHub\VS_BSPv2.0\BSP2.0\VS_BSPv2.0.vcxproj”在节点 2 上(Build 个目标)。
      1>ClCompile:
-         bsp_motor.c
-         c:\sysgcc\arm-eabi\bin\arm-eabi-gcc.exe -mthumb -mcpu=cortex-m3 -IE:/Users/Bert/Documents/GitHub/VS_BSPv2.0/BSP2.0/ -IInc -IDrivers/CMSIS/Device/ST/STM32F1xx/Include -IDrivers/STM32F1xx_HAL_Driver/Inc -IDrivers/STM32F1xx_HAL_Driver/Src -IDrivers/STM32F1xx_HAL_Driver/Inc/Legacy -IDrivers/CMSIS/Include -ggdb -O3 -DARM_MATH_CM3 -DSTM32F103RCTx -DNDEBUG=1 -DRELEASE=1 -Dflash_layout -DSTM32F103xE -DNDEBUG=1 -DRELEASE=1 -ffunction-sections -fdata-sections   -c "Src/bsp_motor.c" -o "VisualGDB/Release/bsp_motor.o" -MD -MP -MF "VisualGDB/Release/bsp_motor.dep"
          main.c
          c:\sysgcc\arm-eabi\bin\arm-eabi-gcc.exe -mthumb -mcpu=cortex-m3 -IE:/Users/Bert/Documents/GitHub/VS_BSPv2.0/BSP2.0/ -IInc -IDrivers/CMSIS/Device/ST/STM32F1xx/Include -IDrivers/STM32F1xx_HAL_Driver/Inc -IDrivers/STM32F1xx_HAL_Driver/Src -IDrivers/STM32F1xx_HAL_Driver/Inc/Legacy -IDrivers/CMSIS/Include -ggdb -O3 -DARM_MATH_CM3 -DSTM32F103RCTx -DNDEBUG=1 -DRELEASE=1 -Dflash_layout -DSTM32F103xE -DNDEBUG=1 -DRELEASE=1 -ffunction-sections -fdata-sections   -c "Src/main.c" -o "VisualGDB/Release/main.o" -MD -MP -MF "VisualGDB/Release/main.dep"
        Link:
@@ -14,10 +12,10 @@
          c:\sysgcc\arm-eabi\bin\arm-eabi-objcopy.exe -O ihex E:/Users/Bert/Documents/GitHub/VS_BSPv2.0/VisualGDB/Release/VS_BSPv2.0 ../VisualGDB/Release/VS_BSPv2.hex
        OutputMemoryUtilization:
          ------------------- Memory utilization report -------------------
-         Used FLASH: 33KB out of 256KB (13%) [+64]
-         Used RAM: 3264 bytes out of 48KB (6%)
+         Used FLASH: 33KB out of 256KB (13%)
+         Used RAM: 3268 bytes out of 48KB (6%)
      1>已完成生成项目“E:\Users\Bert\Documents\GitHub\VS_BSPv2.0\BSP2.0\VS_BSPv2.0.vcxproj”(Build 个目标)的操作。
 
 生成成功。
 
-已用时间 00:00:02.30
+已用时间 00:00:01.75

@@ -1,6 +1,6 @@
 Configuration	BSPv2.0
 STM32CubeMX 	4.24.0
-Date	02/09/2018
+Date	03/09/2018
 MCU	STM32F103RCTx
 
 
@@ -58,6 +58,8 @@ Pin Nb	PINs	FUNCTIONs	LABELs
 54	PD2	GPIO_Input	OpenBoxInput
 55	PB3	GPIO_Input	HorRasterInput
 56	PB4	GPIO_Input	VerRasterInput
+57	PB5	GPIO_Input	MCU_WIRLESSB
+58	PB6	GPIO_Input	MCU_WIRLESSA
 59	PB7	GPIO_Input	MCU_WIRLESS
 62	PB9	GPIO_Output	RunningLED
 
@@ -67,7 +69,7 @@ SOFTWARE PROJECT
 
 Project Settings : 
 Project Name : BSPv2.0
-Project Folder : E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0
+Project Folder : E:\Users\Bert\Documents\GitHub\VS_BSPv2.0\BSP2.0
 Toolchain / IDE : Other Toolchains (GPDSC)
 Firmware Package Name and Version : STM32Cube FW_F1 V1.6.0
 

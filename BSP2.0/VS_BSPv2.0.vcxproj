@@ -90,6 +90,7 @@
     <ClCompile Include="Src\bsp_Log.c" />
     <ClCompile Include="Src\bsp_motor.c" />
     <ClCompile Include="Src\bsp_ProtocolLayer.c" />
+    <ClCompile Include="Src\bsp_RemoteControl.c" />
     <ClCompile Include="Src\gpio.c" />
     <ClCompile Include="Src\adc.c" />
     <ClCompile Include="Src\dma.c" />

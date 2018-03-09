@@ -3,7 +3,8 @@
 
 #ifdef __cplusplus
 extern "C"{
-#endif
+#endif
+
 #include "gpio.h"
 #include "main.h"
 #include "bsp_common.h"	

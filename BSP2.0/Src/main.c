@@ -1,4 +1,3 @@
-
 /**
   ******************************************************************************
   * @file           : main.c
@@ -57,6 +56,7 @@
 #include "bsp_ProtocolLayer.h"
 #include "bsp_AirSensor.h"
 #include "bsp_Log.h"
+#include "bsp_RemoteControl.h"
 
 /* USER CODE END Includes */
 
@@ -67,9 +67,24 @@
 /*Èí¼þ°æ±¾ºÅ*/
 #define  CODEVERSION		0x0201
 
+WIRLESS gWIRLESS;
 MOTORMACHINE gMotorMachine;
 GPIOSTATUSDETECTION gGentleSensorStatusDetection;
 AirSensor gAirSensor;
+
+uint8_t	  gWirlessFlag;
+
+uint8_t   gWirlessOpenCurrentReadVal;
+uint8_t   gWirlessOpenLastReadVal;
+uint16_t  gWirlessOpenCnt;
+
+uint8_t gwirlessCloseCurrentReadVal;
+uint8_t gWirlessCloseLastReadVal;
+
+uint8_t	gWirlessStopCurrentReadVal;
+uint8_t gWirlessStopLastReadVal;
+
+
 
 uint16_t  OpenSpeedCnt;
 uint8_t   OpenSpeedFlag;
@@ -122,10 +137,9 @@ static void MX_NVIC_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
-
-/* USER CODE END PFP */
 void FilterADCSignals(uint16_t xData);
-//void SampleCtrl();
+/* USER CODE END PFP */
+
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -188,7 +202,7 @@ int main(void)
 	BSP_LeftDoorBoardProtocolInit();
 	BSP_DAC5571_Init(NormalOperationMode);
 	
-	BSP_DAC5571_WriteValue(NormalOperationMode, 230);
+	BSP_DAC5571_WriteValue(NormalOperationMode, 200);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -365,6 +379,43 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	/* 50us */
 	if (htim4.Instance == htim->Instance)
 	{
+		
+		gWirlessOpenCurrentReadVal = HAL_GPIO_ReadPin(MCU_WIRLESSOPEN_GPIO_Port, MCU_WIRLESSOPEN_Pin);
+		if (0 == gWirlessOpenCurrentReadVal && 0 == gWirlessOpenLastReadVal)
+		{
+			if (gWirlessFlag)
+			{
+				if (0 == gWIRLESS.OpenFlag)
+				{
+					gWirlessOpenCnt++;
+					if (gWirlessOpenCnt > 20)
+					{
+						gWIRLESS.OpenFlag = 1;
+						gWIRLESS.STopFlag  = 1;
+						gWirlessOpenCnt = 0;
+						gWirlessFlag = 0;
+					}
+				}
+				else
+				{
+					gWirlessOpenCnt++;
+					if (gWirlessOpenCnt > 20)
+					{
+						gWIRLESS.OpenFlag = 0;
+						gWIRLESS.STopFlag  = 0;
+						gWirlessOpenCnt = 0;
+						gWirlessFlag = 0;
+					}
+				}
+			}
+		}
+		else
+		{
+			gWirlessFlag = 1;
+		}
+		gWirlessOpenLastReadVal = gWirlessOpenCurrentReadVal;
+		
+		/**/
 		gHorCurrentRedVal = HAL_GPIO_ReadPin(HorRasterInput_GPIO_Port, HorRasterInput_Pin);
 		gVerCurrentRedVal = HAL_GPIO_ReadPin(VerRasterInput_GPIO_Port, VerRasterInput_Pin);
 		

@@ -34,9 +34,10 @@
 #include "stm32f1xx_hal.h"
 #include "stm32f1xx.h"
 #include "stm32f1xx_it.h"
-#include "bsp_DataTransmissionLayer.h"
 
 /* USER CODE BEGIN 0 */
+#include "bsp_DataTransmissionLayer.h"
+
 extern USARTRECIVETYPE     DriverBoardUsartType;
 extern USARTRECIVETYPE     LeftDoorBoardUsartType;
 void BSP_DriverBoardUsartReceive_IDLE(UART_HandleTypeDef *huart);

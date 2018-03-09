@@ -336,5 +336,8 @@
     <ClCompile Include="Src\bsp_FilteringAlgorithm.c">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\bsp_RemoteControl.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -337,6 +337,10 @@ BSP_StatusTypeDef BSP_MotorActionA(void)
 		{
 			OpenSpeedFlag = 1;
 		}
+		if (DOWNDIR == gMotorMachine.RunDir)
+		{
+			BSP_DAC5571_WriteValue(NormalOperationMode, 60);
+		}
 		gMotorMachine.StartFlag = 0;
 	}
 	return state;

@@ -101,6 +101,10 @@
 #define HorRasterInput_GPIO_Port GPIOB
 #define VerRasterInput_Pin GPIO_PIN_4
 #define VerRasterInput_GPIO_Port GPIOB
+#define MCU_WIRLESSB_Pin GPIO_PIN_5
+#define MCU_WIRLESSB_GPIO_Port GPIOB
+#define MCU_WIRLESSA_Pin GPIO_PIN_6
+#define MCU_WIRLESSA_GPIO_Port GPIOB
 #define MCU_WIRLESS_Pin GPIO_PIN_7
 #define MCU_WIRLESS_GPIO_Port GPIOB
 #define RunningLED_Pin GPIO_PIN_9

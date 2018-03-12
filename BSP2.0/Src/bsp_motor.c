@@ -277,6 +277,7 @@ BSP_StatusTypeDef BSP_MotorCheckA(void)
 		if (gMotorMachine.RunningState && DOWNDIR == gMotorMachine.RunDir)
 		{
 			/* 遇到地感 雷达 压力波 信号时 停止转动 */
+			//if (gMotorMachine.DigitalAntiSmashingFlag)
 			if (gGentleSensorStatusDetection.GpioCheckedFlag || gAirSensor.CheckedFlag)
 			{
 				BSP_MotorStop();
@@ -339,7 +340,7 @@ BSP_StatusTypeDef BSP_MotorActionA(void)
 		}
 		if (DOWNDIR == gMotorMachine.RunDir)
 		{
-			BSP_DAC5571_WriteValue(NormalOperationMode, 60);
+			BSP_DAC5571_WriteValue(NormalOperationMode, 100);
 		}
 		gMotorMachine.StartFlag = 0;
 	}

@@ -85,6 +85,8 @@ uint8_t	gWirlessStopCurrentReadVal;
 uint8_t gWirlessStopLastReadVal;
 
 
+uint8_t	  gTimeoutFlag;	//开闸超时标记位，如果超时发送车未进场
+uint8_t   gCarEnteredFlag; //车辆已经进场标记位
 
 uint16_t  OpenSpeedCnt;
 uint8_t   OpenSpeedFlag;
@@ -100,7 +102,7 @@ uint16_t gXDataBuf[10];
 uint8_t  xCnt;
 uint8_t  xSensorCnt;
 uint16_t Xavg;
-uint16_t AboveXAvg = 0x02FF;
+uint16_t AboveXAvg = 0x0FF;//2A电流时认为触发电子防砸
 
 uint8_t  gComingCarFlag;
 
@@ -138,6 +140,7 @@ static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 void FilterADCSignals(uint16_t xData);
+void CheckCarEnteredFlag(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -227,6 +230,9 @@ int main(void)
 		  BSP_Log_UpAtmoshereStatus(gComingCarFlag);
 		  gAtmosphereTimFlag = 0;
 	  }
+	  
+	  
+	  CheckCarEnteredFlag();
 	  
 	  /*定时上报日志*/
 	  if (gReportLogFlag)
@@ -500,6 +506,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			if (gGentleSensorStatusDetection.GpioCheckedFlag)
 			{
 				gCloseFlag = 0; //车经过之后立即关闸
+				gCarEnteredFlag = 1;
 			}
 			gMotorMachine.GentleSensorFlag = 0;
 			gGentleSensorStatusDetection.GpioCheckedFlag  = 0;
@@ -517,6 +524,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			{
 				gCloseFlag = 0;
 				gCloseTimCnt = 0;
+				gTimeoutFlag = 1;
 			}
 		}
 		else
@@ -614,6 +622,37 @@ void FilterADCSignals(uint16_t xData)
 		}
 		xCnt = 0;
 	}
+}
+
+void CheckCarEnteredFlag(void)
+{
+	uint8_t i = 0;
+	uint8_t pData[7];
+	pData[0] = 0x5B;
+	pData[1] = 0xE3;
+	pData[3] = 0x00;
+	pData[4] = 0x00;
+	pData[6] = 0x5D;
+	
+	if (gCarEnteredFlag)
+	{
+		pData[2] = 0x00;//车辆入场
+		pData[5] = 0xE3;
+		gCarEnteredFlag = 0;
+		BSP_SendDataToDriverBoard(pData, 7, 0xFFFF);
+		return ;
+	}
+	
+	if (gTimeoutFlag)
+	{
+		pData[2] = 0x01;//入场超时
+		pData[5] = 0xE2;
+		gTimeoutFlag = 0;
+		BSP_SendDataToDriverBoard(pData, 7, 0xFFFF);
+		return;
+	}
+	
+	
 }
 /* USER CODE END 4 */
 

@@ -4,10 +4,12 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif
+
 #include "main.h"
 #include "gpio.h"
 #include "bsp_common.h"
+
 
 #define   MCU_WIRLESSOPEN_Pin			MCU_WIRLESSB_Pin
 #define   MCU_WIRLESSOPEN_GPIO_Port		MCU_WIRLESSB_GPIO_Port
@@ -40,4 +42,4 @@ BSP_StatusTypeDef BSP_RemoteControlInit(void);
 }
 #endif
 
-#endif	/**/
+#endif	/**/

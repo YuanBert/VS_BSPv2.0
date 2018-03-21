@@ -41,7 +41,7 @@
     <AllDependencies>
       <ProjectDependency>
         <RelativePath>BSPv2.0.gpdsc</RelativePath>
-        <Timestamp>131650549378434407</Timestamp>
+        <Timestamp>131654945812544025</Timestamp>
       </ProjectDependency>
     </AllDependencies>
     <RootDirectory>
@@ -317,11 +317,11 @@
       <ImportedConfiguration>
         <Settings>
           <IncludeDirectories>
-            <string>E:\Users\Bert\Documents\GitHub\VS_BSPv2.0\BSP2.0\Inc</string>
-            <string>E:\Users\Bert\Documents\GitHub\VS_BSPv2.0\BSP2.0\Drivers\CMSIS\Device\ST\STM32F1xx\Include</string>
-            <string>E:\Users\Bert\Documents\GitHub\VS_BSPv2.0\BSP2.0\Drivers\STM32F1xx_HAL_Driver\Inc</string>
-            <string>E:\Users\Bert\Documents\GitHub\VS_BSPv2.0\BSP2.0\Drivers\STM32F1xx_HAL_Driver\Src</string>
-            <string>E:\Users\Bert\Documents\GitHub\VS_BSPv2.0\BSP2.0\Drivers\STM32F1xx_HAL_Driver\Inc\Legacy</string>
+            <string>E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\Inc</string>
+            <string>E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\Drivers\CMSIS\Device\ST\STM32F1xx\Include</string>
+            <string>E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\Drivers\STM32F1xx_HAL_Driver\Inc</string>
+            <string>E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\Drivers\STM32F1xx_HAL_Driver\Src</string>
+            <string>E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\Drivers\STM32F1xx_HAL_Driver\Inc\Legacy</string>
           </IncludeDirectories>
           <PreprocessorMacros>
             <string>$$com.sysprogs.bspoptions.primary_memory$$_layout</string>

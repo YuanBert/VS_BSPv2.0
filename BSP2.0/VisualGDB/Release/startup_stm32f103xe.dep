@@ -1,5 +1,0 @@
-VisualGDB/Release/startup_stm32f103xe.o: \
- C:/Users/Bert/AppData/Local/VisualGDB/EmbeddedBSPs/arm-eabi/com.sysprogs.arm.stm32/STM32F1xxxx/StartupFiles/startup_stm32f103xe.c \
- c:\sysgcc\arm-eabi\lib\gcc\arm-eabi\7.2.0\include\stddef.h
-
-c:\sysgcc\arm-eabi\lib\gcc\arm-eabi\7.2.0\include\stddef.h:

@@ -72,6 +72,41 @@ MOTORMACHINE gMotorMachine;
 GPIOSTATUSDETECTION gGentleSensorStatusDetection;
 AirSensor gAirSensor;
 
+//开闸控速矩阵
+uint8_t Speed15SBuf[300] = {
+ 47 , 52 , 56 , 59 , 62 , 64 , 67 , 69 , 71 , 73 ,
+ 75 , 77 , 79 , 80 , 82 , 83 , 85 , 86 , 88 , 89 ,
+ 91 , 92 , 93 , 94 , 96 , 97 , 98 , 99 ,100 ,102 ,
+103 ,104 ,105 ,106 ,107 ,108 ,109 ,110 ,111 ,112 ,
+113 ,114 ,115 ,116 ,117 ,118 ,118 ,119 ,120 ,121 ,
+122 ,123 ,124 ,124 ,125 ,126 ,127 ,128 ,129 ,129 ,
+130 ,131 ,132 ,132 ,133 ,134 ,135 ,135 ,136 ,137 ,
+138 ,138 ,139 ,140 ,141 ,141 ,142 ,143 ,143 ,144 ,
+145 ,145 ,146 ,147 ,147 ,148 ,149 ,149 ,150 ,151 ,
+151 ,152 ,153 ,153 ,154 ,154 ,155 ,156 ,156 ,157 ,
+158 ,158 ,159 ,159 ,160 ,161 ,161 ,162 ,162 ,163 ,
+164 ,164 ,165 ,165 ,166 ,166 ,167 ,168 ,168 ,169 ,
+169 ,170 ,170 ,171 ,171 ,172 ,173 ,173 ,174 ,174 ,
+175 ,175 ,176 ,176 ,177 ,177 ,178 ,178 ,179 ,179 ,
+180 ,180 ,181 ,181 ,182 ,182 ,183 ,183 ,184 ,184 ,
+184 ,183 ,183 ,182 ,182 ,181 ,181 ,180 ,180 ,179 ,
+179 ,178 ,178 ,177 ,177 ,176 ,176 ,175 ,175 ,174 ,
+174 ,173 ,173 ,172 ,171 ,171 ,170 ,170 ,169 ,169 ,
+168 ,168 ,167 ,166 ,166 ,165 ,165 ,164 ,164 ,163 ,
+162 ,162 ,161 ,161 ,160 ,159 ,159 ,158 ,158 ,157 ,
+156 ,156 ,155 ,154 ,154 ,153 ,153 ,152 ,151 ,151 ,
+150 ,149 ,149 ,148 ,147 ,147 ,146 ,145 ,145 ,144 ,
+143 ,143 ,142 ,141 ,141 ,140 ,139 ,138 ,138 ,137 ,
+136 ,135 ,135 ,134 ,133 ,132 ,132 ,131 ,130 ,129 ,
+129 ,128 ,127 ,126 ,125 ,124 ,124 ,123 ,122 ,121 ,
+120 ,119 ,118 ,118 ,117 ,116 ,115 ,114 ,113 ,112 ,
+111 ,110 ,109 ,108 ,107 ,106 ,105 ,104 ,103 ,102 ,
+100 , 99 , 98 , 97 , 96 , 94 , 93 , 92 , 91 , 89 ,
+ 88 , 86 , 85 , 83 , 82 , 80 , 79 , 77 , 75 , 73 ,
+ 71 , 69 , 67 , 64 , 62 , 59 , 56 , 52 , 47 , 35 
+};
+
+
 uint8_t	  gWirlessFlag;
 
 uint8_t   gWirlessOpenCurrentReadVal;
@@ -104,7 +139,7 @@ uint8_t  xSensorCnt;
 uint16_t Xavg;
 uint16_t AboveXAvg = 0x0FF;//2A电流时认为触发电子防砸
 
-uint8_t  gComingCarFlag;
+uint8_t gComingCarFlag;
 
 uint8_t gHorCurrentRedVal;
 uint8_t gHorLastCurrentRedVal;
@@ -118,7 +153,10 @@ uint8_t gStepCnterLastRedVal;
 uint8_t gLastStepValue;
 uint8_t gCurrentStepValue;
 
+uint8_t gTIM6Cnt;
 uint8_t gTIM6Flag;
+uint8_t gTIM6TwoFlag;
+uint16_t gSpeed;
 
 /*氛围灯标记以及氛围灯控制计时*/
 uint8_t gAtmosphereTimFlag;
@@ -244,6 +282,25 @@ int main(void)
 		  gReportLogFlag = 0;
 	  }
 	  
+          /* 在开闸的过程中每50ms更新一次数据值，进行调速 */
+          if(gTIM6TwoFlag)
+          {
+            if(OpenSpeedFlag)
+            {
+              BSP_DAC5571_WriteValue(NormalOperationMode,Speed15SBuf[gSpeed]);
+              gSpeed++;
+              if(gSpeed > 299)
+              {
+                gSpeed = 299;
+              }
+            }
+            else
+            {
+              gSpeed = 0;
+            }
+            gTIM6TwoFlag = 0;
+          }
+          
 	  /* 在开闸的过程中 每五个毫秒获取一次电流值 */
 	  if (gTIM6Flag)
 	  {
@@ -468,6 +525,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					gMotorMachine.EncounteredFlag = 0;//将遇阻反弹标记位清零
 					gMotorMachine.DigitalAntiSmashingFlag = 0;//数字防砸标记位清空
 					gCloseFlag = 1;//垂直到位，打开定时器，进行延时，延时后进行关闸
+                                        OpenSpeedFlag = 0;
 				}
 			}
 		}
@@ -578,12 +636,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if (htim6.Instance == htim->Instance)
 	{
 		gTIM6Flag = 1;
-		if (OpenSpeedFlag)
-		{
-                  /*添加速度调制*/
-                  
-                  
-		}
+                gTIM6Cnt++;
+                if(gTIM6Cnt > 1)
+                {
+                  gTIM6TwoFlag = 1;
+                  gTIM6Cnt = 0;
+                }
 		
 	}
 }
@@ -653,8 +711,6 @@ void CheckCarEnteredFlag(void)
 		BSP_SendDataToDriverBoard(pData, 7, 0xFFFF);
 		return;
 	}
-	
-	
 }
 /* USER CODE END 4 */
 

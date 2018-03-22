@@ -15,6 +15,11 @@ E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\gpio
 E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\i2c.pbi
 E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\main.pbi
 E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\spi.pbi
+E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm32f1xx_hal_msp.pbi
+E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm32f1xx_it.pbi
+E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\tim.pbi
+E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\usart.pbi
+E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\system_stm32f1xx.pbi
 E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm32f1xx_hal.pbi
 E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm32f1xx_hal_adc.pbi
 E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm32f1xx_hal_adc_ex.pbi
@@ -25,7 +30,6 @@ E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm3
 E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm32f1xx_hal_gpio.pbi
 E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm32f1xx_hal_gpio_ex.pbi
 E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm32f1xx_hal_i2c.pbi
-E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm32f1xx_hal_msp.pbi
 E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm32f1xx_hal_pwr.pbi
 E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm32f1xx_hal_rcc.pbi
 E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm32f1xx_hal_rcc_ex.pbi
@@ -34,7 +38,3 @@ E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm3
 E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm32f1xx_hal_tim.pbi
 E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm32f1xx_hal_tim_ex.pbi
 E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm32f1xx_hal_uart.pbi
-E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\stm32f1xx_it.pbi
-E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\system_stm32f1xx.pbi
-E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\tim.pbi
-E:\Users\bertz\Documents\GitHub\VS_BSPv2.0\BSP2.0\BSPv2.0\EWARM\BSPv2.0\Obj\usart.pbi
